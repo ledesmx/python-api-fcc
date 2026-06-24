@@ -11,13 +11,19 @@ class Post(BaseModel):
     published: bool = True
     rating: Optional[int] = None
 
+posts = [
+    {"title": "Busco jale", "content": "Quiero chambaaaa", "id": 0},
+    {"title": "Y si si?", "content": "Podemos lograrlo, hay que confiar", "id": 1},
+]
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
 @app.get("/posts")
 def get_posts():
-    return {"data": "Post 1"}
+    # Fastapi serializes it automatically
+    return {"data": posts}
 
 @app.post("/posts")
 def create_post(new_post: Post):
