@@ -24,7 +24,3 @@ def create_post(new_post: Post):
     print(new_post)
     return {"newpost": f"title: {new_post.title}  -  content: {new_post.content}"}
 
-@app.post("/createpost2")
-def create_post(payload: dict = Body(...)):
-    print(payload)
-    return {"newpost": f"title: {payload.get("title")}  -  content: {payload.get("content")}"}
