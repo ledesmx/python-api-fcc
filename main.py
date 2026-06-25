@@ -16,6 +16,11 @@ posts = [
     {"title": "Busco jale", "content": "Quiero chambaaaa", "id": 0},
     {"title": "Y si si?", "content": "Podemos lograrlo, hay que confiar", "id": 1},
 ]
+def find_post(id):
+    for post in posts:
+        if post.get("id") == id:
+            return post
+    return None
 
 @app.get("/")
 async def root():
@@ -34,3 +39,8 @@ def create_post(new_post: Post):
     posts.append(post_dict)
     print(new_post)
     return {"data": post_dict}
+
+@app.get("/posts/{id}")
+def get_post(id: int):
+    post = find_post(id)
+    return {"data": post}
