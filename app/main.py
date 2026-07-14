@@ -2,6 +2,7 @@ from fastapi import FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from random import randrange
+from psycopg.rows import dict_row
 import psycopg
 import os
 
@@ -15,9 +16,7 @@ class Post(BaseModel):
 
 db_name = os.getenv("DB_NAME")
 db_pass = os.getenv("DB_PASS")
-with psycopg.connect(f"host=localhost port=5432 dbname={db_name} user=postgres password={db_pass}") as conn:
-    with conn.cursor() as cur:
-        print("Database was succesful")
+conn = psycopg.connect(f"host=localhost port=5432 dbname={db_name} user=postgres password={db_pass}")
 
 
 posts = [
@@ -41,8 +40,12 @@ async def root():
 
 @app.get("/posts")
 def get_posts():
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute("""SELECT * FROM posts""")
+        posts = cur.fetchall()
+        print(posts)
     # Fastapi serializes it automatically
-    return {"data": posts}
+        return {"data": posts}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(new_post: Post):
