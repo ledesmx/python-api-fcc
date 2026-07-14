@@ -2,6 +2,8 @@ from fastapi import FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from random import randrange
+import psycopg
+import os
 
 app = FastAPI()
 
@@ -10,6 +12,13 @@ class Post(BaseModel):
     content: str
     published: bool = True
     rating: Optional[int] = None
+
+db_name = os.getenv("DB_NAME")
+db_pass = os.getenv("DB_PASS")
+with psycopg.connect(f"host=localhost port=5432 dbname={db_name} user=postgres password={db_pass}") as conn:
+    with conn.cursor() as cur:
+        print("Database was succesful")
+
 
 posts = [
     {"title": "Busco jale", "content": "Quiero chambaaaa", "id": 0},
