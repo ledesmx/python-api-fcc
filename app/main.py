@@ -42,8 +42,6 @@ def get_posts():
     with conn.cursor(row_factory=dict_row) as cur:
         cur.execute("""SELECT * FROM posts""")
         posts = cur.fetchall()
-        print(posts)
-    # Fastapi serializes it automatically
         return {"data": posts}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
@@ -59,15 +57,19 @@ def create_post(new_post: Post):
 
 @app.get("/posts/{id}")
 def get_post(id: int):
-    post = find_post(id)
-    if not post:
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {"message": f"post with id: {id} was not found"}
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Post with id: {id} was not found"
-        )
-    return {"data": post}
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute("""SELECT * FROM posts
+                    WHERE id = %s""",
+                    (id,))
+        post = cur.fetchone()
+
+        if not post:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Post with id: {id} was not found"
+            )
+        
+        return {"data": post}
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
