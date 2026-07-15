@@ -12,7 +12,6 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
 
 db_name = os.getenv("DB_NAME")
 db_pass = os.getenv("DB_PASS")
@@ -49,12 +48,14 @@ def get_posts():
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(new_post: Post):
-    post_dict = new_post.model_dump()
-    # Usually tha DB do this, but for now I'm going to hardcode it
-    post_dict["id"] = randrange(0,1000)
-    posts.append(post_dict)
-    print(new_post)
-    return {"data": post_dict}
+    with conn.cursor() as cur:
+        cur.execute("""INSERT INTO posts (title, content, published)
+                    VALUES (%s, %s, %s) RETURNING *""", 
+                    (new_post.title, new_post.content, new_post.published))
+        
+        post_result = cur.fetchone()
+        conn.commit()
+        return {"data": post_result}
 
 @app.get("/posts/{id}")
 def get_post(id: int):
